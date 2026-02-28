@@ -130,4 +130,4 @@ app.MapPrometheusScrapingEndpoint();
 app.MapGet("/health", () => "OK");
 app.MapGet("/test", () => new { message = "Identity service running" });
 
-app.Run();
+await app.RunAsync();
