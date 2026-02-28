@@ -1,5 +1,7 @@
 using System.Security.Claims;
 
+using Hotelier.Events;
+
 using IdentityService.Domain;
 using IdentityService.Infrastructure;
 
@@ -132,7 +134,7 @@ public class UsersController(
         await publisher.Publish(new UserDeleted
         {
             UserId = user.Id,
-            UserType = user.UserType
+            UserType = user.UserType.ToString()
         });
 
         logger.LogInformation("User {Username} deleted account", user.Username);

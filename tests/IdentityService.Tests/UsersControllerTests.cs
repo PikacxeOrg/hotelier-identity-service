@@ -2,10 +2,11 @@ using System.Security.Claims;
 
 using FluentAssertions;
 
+using Hotelier.Events;
+
 using IdentityService.Domain;
 using IdentityService.Infrastructure;
 using IdentityService.Api;
-using IdentityService.Tests;
 
 using MassTransit;
 
@@ -223,7 +224,7 @@ public class UsersControllerTests : IDisposable
         _publisherMock.Verify(p => p.Publish(
             It.Is<UserDeleted>(e =>
                 e.UserId == _seedUser.Id &&
-                e.UserType == UserType.Guest),
+                e.UserType == nameof(UserType.Guest)),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

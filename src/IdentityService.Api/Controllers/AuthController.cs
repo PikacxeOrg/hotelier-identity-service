@@ -1,5 +1,7 @@
 using System.Security.Claims;
 
+using Hotelier.Events;
+
 using IdentityService.Domain;
 using IdentityService.Infrastructure;
 
@@ -62,7 +64,7 @@ public class AuthController(
             UserId = user.Id,
             Username = user.Username,
             Email = user.Email,
-            UserType = user.UserType
+            UserType = user.UserType.ToString()
         });
 
         logger.LogInformation("User {Username} registered (type={UserType})", user.Username, user.UserType);

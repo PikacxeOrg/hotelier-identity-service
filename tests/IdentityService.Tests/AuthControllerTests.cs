@@ -1,5 +1,7 @@
 using FluentAssertions;
 
+using Hotelier.Events;
+
 using IdentityService.Domain;
 using IdentityService.Infrastructure;
 using IdentityService.Api;
@@ -113,7 +115,7 @@ public class AuthControllerTests : IDisposable
         _publisherMock.Verify(p => p.Publish(
             It.Is<UserRegistered>(e =>
                 e.Username == "eventuser" &&
-                e.UserType == UserType.Guest),
+                e.UserType == nameof(UserType.Guest)),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
