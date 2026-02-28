@@ -17,9 +17,6 @@ env:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/IdentityService
     steps:
       - uses: actions/checkout@v4
 
@@ -36,10 +33,20 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      - name: Restore
+      - name: Restore Domain
+        working-directory: src/IdentityService.Domain
         run: dotnet restore --locked-mode
 
-      - name: Build
+      - name: Restore Infrastructure
+        working-directory: src/IdentityService.Infrastructure
+        run: dotnet restore --locked-mode
+
+      - name: Restore Api
+        working-directory: src/IdentityService.Api
+        run: dotnet restore --locked-mode
+
+      - name: Build Api
+        working-directory: src/IdentityService.Api
         run: dotnet build --no-restore -c ${{ env.CONFIGURATION }}
 
       - name: Unit Tests
@@ -65,12 +72,20 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      - name: Restore
-        working-directory: src/IdentityService
+      - name: Restore Domain
+        working-directory: src/IdentityService.Domain
         run: dotnet restore --locked-mode
 
-      - name: Build
-        working-directory: src/IdentityService
+      - name: Restore Infrastructure
+        working-directory: src/IdentityService.Infrastructure
+        run: dotnet restore --locked-mode
+
+      - name: Restore Api
+        working-directory: src/IdentityService.Api
+        run: dotnet restore --locked-mode
+
+      - name: Build Api
+        working-directory: src/IdentityService.Api
         run: dotnet build --no-restore -c ${{ env.CONFIGURATION }}
 
       - name: Start infra via docker compose
