@@ -19,6 +19,7 @@ namespace IdentityService.Api;
 public class UsersController(
     IdentityDbContext db,
     IPublishEndpoint publisher,
+    IReservationServiceClient reservationClient,
     ILogger<UsersController> logger) : ControllerBase
 {
     // -------------------------------------------------------
@@ -115,18 +116,21 @@ public class UsersController(
     //   Guest: cannot delete if active (approved) reservations exist
     //   Host:  cannot delete if future reservations on any accommodation
     //
-    // The actual reservation check is enforced by calling reservation-service
-    // via a synchronous HTTP request or a Saga. For this reference
-    // implementation we publish the UserDeleted event; reservation-service
-    // and accommodation-service handle cascading logic on their end.
-    //
-    // If a hard pre-check is needed later, add an HTTP call here.
+    // Calls reservation-service synchronously to verify the user
+    // has no blocking reservations before proceeding.
     // -------------------------------------------------------
     [HttpDelete("me")]
     public async Task<IActionResult> DeleteAccount()
     {
         var user = await GetCurrentUser();
         if (user is null) return NotFound();
+
+        // Pre-check: ask reservation-service whether deletion is safe
+        var (canDelete, reason) = await reservationClient
+            .CanDeleteUserAsync(user.Id, user.UserType.ToString());
+
+        if (!canDelete)
+            return Conflict(new { message = reason });
 
         db.Users.Remove(user); // cascade deletes refresh tokens
         await db.SaveChangesAsync();

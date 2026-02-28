@@ -22,6 +22,7 @@ public class UsersControllerTests : IDisposable
 {
     private readonly IdentityDbContext _db;
     private readonly Mock<IPublishEndpoint> _publisherMock;
+    private readonly Mock<IReservationServiceClient> _reservationClientMock;
     private readonly UsersController _sut;
     private readonly User _seedUser;
 
@@ -29,11 +30,17 @@ public class UsersControllerTests : IDisposable
     {
         _db = DbContextFactory.Create();
         _publisherMock = new Mock<IPublishEndpoint>();
+        _reservationClientMock = new Mock<IReservationServiceClient>();
         var logger = new Mock<ILogger<UsersController>>();
+
+        // Default: allow deletion
+        _reservationClientMock
+            .Setup(c => c.CanDeleteUserAsync(It.IsAny<Guid>(), It.IsAny<string>()))
+            .ReturnsAsync((true, (string?)null));
 
         _seedUser = DbContextFactory.SeedUser(_db, "testuser", "Pass123!", UserType.Guest);
 
-        _sut = new UsersController(_db, _publisherMock.Object, logger.Object);
+        _sut = new UsersController(_db, _publisherMock.Object, _reservationClientMock.Object, logger.Object);
         SetAuthenticatedUser(_seedUser.Id);
     }
 
@@ -225,6 +232,56 @@ public class UsersControllerTests : IDisposable
             It.Is<UserDeleted>(e =>
                 e.UserId == _seedUser.Id &&
                 e.UserType == nameof(UserType.Guest)),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAccount_GuestWithActiveReservations_ReturnsConflict()
+    {
+        _reservationClientMock
+            .Setup(c => c.CanDeleteUserAsync(_seedUser.Id, nameof(UserType.Guest)))
+            .ReturnsAsync((false, "Cannot delete account: you have 1 active reservation(s)."));
+
+        var result = await _sut.DeleteAccount();
+
+        result.Should().BeOfType<ConflictObjectResult>();
+        _db.Users.Find(_seedUser.Id).Should().NotBeNull("user should NOT be deleted");
+    }
+
+    [Fact]
+    public async Task DeleteAccount_HostWithFutureReservations_ReturnsConflict()
+    {
+        // Replace seed user with a Host
+        var host = DbContextFactory.SeedUser(_db, "hostuser", "Pass123!", UserType.Host);
+        SetAuthenticatedUser(host.Id);
+
+        _reservationClientMock
+            .Setup(c => c.CanDeleteUserAsync(host.Id, nameof(UserType.Host)))
+            .ReturnsAsync((false, "Cannot delete account: you have 2 active or pending reservation(s) on your accommodations."));
+
+        var result = await _sut.DeleteAccount();
+
+        result.Should().BeOfType<ConflictObjectResult>();
+        _db.Users.Find(host.Id).Should().NotBeNull("host should NOT be deleted");
+    }
+
+    [Fact]
+    public async Task DeleteAccount_HostWithNoFutureReservations_DeletesAndPublishes()
+    {
+        var host = DbContextFactory.SeedUser(_db, "hostclean", "Pass123!", UserType.Host);
+        SetAuthenticatedUser(host.Id);
+
+        // Default mock already returns canDelete = true
+
+        var result = await _sut.DeleteAccount();
+
+        result.Should().BeOfType<NoContentResult>();
+        _db.Users.Find(host.Id).Should().BeNull();
+
+        _publisherMock.Verify(p => p.Publish(
+            It.Is<UserDeleted>(e =>
+                e.UserId == host.Id &&
+                e.UserType == nameof(UserType.Host)),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

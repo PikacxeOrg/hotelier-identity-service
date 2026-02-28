@@ -56,6 +56,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // -------------------------------------------------------
+// Reservation-service HTTP client (for pre-deletion check)
+// -------------------------------------------------------
+var reservationServiceUrl = builder.Configuration["Services:Reservation"]
+    ?? "http://reservation-service:8080";
+
+builder.Services.AddHttpClient<IReservationServiceClient, ReservationServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(reservationServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
+// -------------------------------------------------------
 // MassTransit + RabbitMQ
 // -------------------------------------------------------
 builder.Services.AddMassTransit(x =>
