@@ -8,6 +8,8 @@ using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // -------------------------------------------------------
+// Reservation-service HTTP client (for pre-deletion check)
+// -------------------------------------------------------
+var reservationServiceUrl = builder.Configuration["Services:Reservation"]
+    ?? "http://reservation-service:8080";
+
+builder.Services.AddHttpClient<IReservationServiceClient, ReservationServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(reservationServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
+// -------------------------------------------------------
 // MassTransit + RabbitMQ
 // -------------------------------------------------------
 builder.Services.AddMassTransit(x =>
@@ -76,7 +90,12 @@ builder.Services.AddMassTransit(x =>
 // -------------------------------------------------------
 // API / Swagger
 // -------------------------------------------------------
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

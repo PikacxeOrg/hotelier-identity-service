@@ -1,4 +1,4 @@
-namespace IdentityService.Domain;
+namespace Hotelier.Events;
 
 /// <summary>
 /// Published when a user updates their profile.
