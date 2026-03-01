@@ -43,10 +43,9 @@ public class ReservationServiceClient(
         }
     }
 
-    private sealed class CanDeleteDto
-    {
-        public bool CanDelete { get; set; }
-        public int ActiveCount { get; set; }
-        public string? Reason { get; set; }
-    }
+    private sealed record CanDeleteDto(
+        bool CanDelete,
+        int ActiveCount,
+        string? Reason
+    );
 }
