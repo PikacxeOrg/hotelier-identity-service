@@ -22,14 +22,14 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4.0.0
+        uses: gittools/actions/gitversion/setup@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
           versionSpec: "6.x"
           preferLatestVersion: true
 
       - name: Determine version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v4.0.0
+        uses: gittools/actions/gitversion/execute@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
           useConfigFile: true
 
@@ -75,14 +75,14 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4.0.0
+        uses: gittools/actions/gitversion/setup@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
           versionSpec: "6.x"
           preferLatestVersion: true
 
       - name: Determine version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v4.0.0
+        uses: gittools/actions/gitversion/execute@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
           useConfigFile: true
 
@@ -142,14 +142,14 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4.0.0
+        uses: gittools/actions/gitversion/setup@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
           versionSpec: "6.x"
           preferLatestVersion: true
 
       - name: Determine version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v4.0.0
+        uses: gittools/actions/gitversion/execute@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
           useConfigFile: true
 
