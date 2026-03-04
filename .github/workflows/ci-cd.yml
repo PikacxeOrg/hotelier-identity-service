@@ -155,10 +155,10 @@ jobs:
 
       - name: Write Kaniko docker config
         run: |
-          mkdir -p "${{ GITHUB_WORKSPACE }}/.kaniko"
+          mkdir -p "${{ github.workspace }}/.kaniko"
           printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
             "$(printf '%s:%s' '${{ secrets.DOCKERHUB_USERNAME }}' '${{ secrets.DOCKERHUB_TOKEN }}' | base64 -w0)" \
-            > "${{ GITHUB_WORKSPACE }}/.kaniko/config.json"
+            > "${{ github.workspace }}/.kaniko/config.json"
 
       - name: Build and push
         uses: docker://gcr.io/kaniko-project/executor:v1.23.0
