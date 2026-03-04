@@ -33,13 +33,12 @@ public class ReservationServiceClient(
         }
         catch (Exception ex)
         {
-            // If reservation-service is unreachable, fail-open with a warning.
-            // This prevents the identity service from being permanently blocked
-            // when reservation-service is down. Adjust to fail-closed if desired.
-            logger.LogWarning(ex,
-                "Could not reach reservation-service to verify deletion for user {UserId}. Allowing deletion.",
+            // Fail-closed: if reservation-service is unreachable we cannot confirm
+            // it is safe to delete, so we block the operation.
+            logger.LogError(ex,
+                "Could not reach reservation-service to verify deletion for user {UserId}. Blocking deletion.",
                 userId);
-            return (true, null);
+            return (false, "Account deletion is temporarily unavailable. Please try again in a moment.");
         }
     }
 
