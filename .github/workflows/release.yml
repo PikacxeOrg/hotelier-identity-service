@@ -22,7 +22,7 @@ on:
         default: ""
 
 permissions:
-  contents: write   # push tag + release
+  contents: write # push tag + release
 
 jobs:
   release:
@@ -40,7 +40,7 @@ jobs:
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@81f0bc44e27a689ce858668d7a2081ac2387b605
         with:
-          versionSpec: '6.x'
+          versionSpec: "6.x"
           preferLatestVersion: true
 
       - name: Determine version
@@ -84,7 +84,7 @@ jobs:
       # 4. Create GitHub Release with auto-generated changelog
       # ----------------------------------------------------------------
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@e798e6a0e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: ${{ steps.ver.outputs.tag }}
